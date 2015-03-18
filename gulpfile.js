@@ -9,10 +9,11 @@ var reload = browserSync.reload;
 var browserify = require('browserify');
 var babelify = require('babelify');
 var source = require('vinyl-source-stream');
-var transform = require('vinyl-transform');
+// var transform = require('vinyl-transform');
 
 var path = require('path');
 
+// For same as 'scripts' but drops you in the debugger
 gulp.task('scripts-debug', function () {
   var spawn = require('child_process').spawn;
   spawn('node', [
@@ -22,31 +23,20 @@ gulp.task('scripts-debug', function () {
   ], { stdio: 'inherit' });
 });
 
-
 gulp.task('scripts', function () {
-  console.log('why you no stop?');
-
-  var a; // for the debuggins
-
   // This works correctly
-  a = browserify({
+  var b = browserify({
     entries: './app/scripts/main.js'
   });
-
-  a.transform(babelify);
-  console.log('why you no stop again?');
-  a = a.bundle();
+  b.transform(babelify);
+  return b.bundle(function (err) { if (err) { console.log(err); }})
+    .pipe(source('bundle.js'))
+    .pipe(gulp.dest('.tmp/scripts'));
   // a = a.pipe($.sourcemaps.init({loadMaps: true}));
   // a = a.pipe($.sourcemaps.write('./'));
-  a = a.pipe(source('bundle.js'));
-  a = a.pipe(gulp.dest('.tmp/scripts'));
-
-  return a;
-
 
 // This will add sourcemaps, but will not compile the es6
 /*
-
   var browserified = transform(function(filename) {
     var b = browserify({entries: filename, debug: true});
 // when this is uncommented:
@@ -63,41 +53,6 @@ gulp.task('scripts', function () {
     .pipe(gulp.dest('.tmp/scripts'));
 */
 
-
-
-
-// This is a mish-mash of stuff.
-  // var b = browserify({
-  //   entries: './app/scripts/main.js'
-  // });
-  // b.transform(babelify);
-  // return b.bundle()
-  //  .pipe(source('bundle.js'))
-  //  .pipe(gulp.dest('.tmp/scripts'));
-
-  // return gulp.src('./app/scripts/main.js')
-  //   .pipe(browserified)
-  //   // .pipe($.sourcemaps.init({loadMaps: true}))
-  //   // .pipe($.sourcemaps.write('./'))
-  //   .pipe(gulp.dest('.tmp/scripts'));
-
-
-
-// None of the rest of these worked.
-  // var b = $.browserify();
-  // b.transform($.babelify);
-  // b.add(['app/scripts/**/main.js']);
-  // return b.bundle()
-  //   .pipe($.source('bundle.js'))
-  //   .pipe(gulp.dest('.tmp/scripts'));
-
-  // var b = $.browserify({
-  //       entries: 'app/scripts/**/main.js'
-  // })
-  // .transform($.babelify)
-  // .bundle()
-  // .pipe($.source('bundle.js'))
-  //   .pipe(gulp.dest('.tmp/scripts'));
 });
 
 gulp.task('styles', function () {
