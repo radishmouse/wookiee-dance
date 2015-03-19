@@ -36,7 +36,8 @@ body {
 <script src="/scripts/socket.io.js"></script>
 <script type="text/javascript">
 
-var socket = io.connect('http://172.20.3.194:8080/');
+alert('Looking for a wookiee-sockets server at http://192.168.1.100:8080/ \nYou may want to change this in accel-fun.html');
+var socket = io.connect('http://192.168.1.100:8080/');
 socket.on('connect', function () {
   console.log('connected');
 });
