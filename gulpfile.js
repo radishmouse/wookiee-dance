@@ -9,19 +9,7 @@ var reload = browserSync.reload;
 var browserify = require('browserify');
 var babelify = require('babelify');
 var source = require('vinyl-source-stream');
-// var transform = require('vinyl-transform');
 
-var path = require('path');
-
-// For same as 'scripts' but drops you in the debugger
-gulp.task('scripts-debug', function () {
-  var spawn = require('child_process').spawn;
-  spawn('node', [
-    '--debug-brk',
-    path.join(__dirname, 'node_modules/gulp/bin/gulp.js'),
-    'scripts'
-  ], { stdio: 'inherit' });
-});
 
 gulp.task('scripts', function () {
   // This works correctly
@@ -29,30 +17,9 @@ gulp.task('scripts', function () {
     entries: './app/scripts/main.js'
   });
   b.transform(babelify);
-  return b.bundle(function (err) { if (err) { console.log(err); }})
+  return b.bundle(function (err) { if (err) { (err); }})
     .pipe(source('bundle.js'))
     .pipe(gulp.dest('.tmp/scripts'));
-  // a = a.pipe($.sourcemaps.init({loadMaps: true}));
-  // a = a.pipe($.sourcemaps.write('./'));
-
-// This will add sourcemaps, but will not compile the es6
-/*
-  var browserified = transform(function(filename) {
-    var b = browserify({entries: filename, debug: true});
-// when this is uncommented:
-// Error: write after end
-    // b.transform(babelify);
-    return b.bundle();
-  });
-
-  return gulp.src('./app/scripts/main.js')
-    .pipe(browserified)
-    .pipe($.sourcemaps.init({loadMaps: true}))
-        // Add transformation tasks to the pipeline here.
-    .pipe($.sourcemaps.write('./'))
-    .pipe(gulp.dest('.tmp/scripts'));
-*/
-
 });
 
 gulp.task('styles', function () {

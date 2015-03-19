@@ -1,112 +1,71 @@
-/* jshint devel:true */
-// console.log('\'Allo \'Allo!');
-//
-import {Hello, bob} from './allo';
+/* jshint devel:true, esnext: true */
+import io from 'socket.io-client';
 
-let allo = new Hello('whirlledisz');
-allo.do();
+// You are importing the default value exported from the every.js file.
+// You can bind it to whatever local name you like.
+// For this example, we are binding it to the name `recur`.
+import recur from './every';
 
+const SOCKET_URL = 'http://localhost:8080/';
+let socket = io.connect(SOCKET_URL);
 
-// explicit scoping
-{
+// The `socket` object is an event emitter.
+// We can add listeners to it, and these listeners look for .
+// Specifically, the socket.io API  provides an `on` method for attaching
+// callbacks to a particular websockets message.
+socket.on('connect', () => {
+  'use strict';
 
-  // We're unpacking the array a.k.a. destructuring it.
-  // But, we're also using the spread operator (...) to repack values into an array, labeled `c`
-  let [a, b, ...c] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  console.log('connected!');
 
-  console.log(`inside the let scope, a + b == ${a + b}`);
-
-  // Look! It's an array of the rest of the values.
-  console.log(`here\'s johnny: ${c}`);
-
-}
-
-// There's no `c` here!
-// console.log(c);
-// => Uncaught ReferenceError: c is not defined
-
-
-// Similarly, we might have a function that uses rest params and then does something with them.
-//
-function jank(a, b, ...c) {
-
-  // What happens here if we don't have a `b`?
-  // If `b` is undefined, we're stuck with string concatenation.
-  console.log(`sum of jank: ${a + b}`);
-
-  // Look! It's an array of the rest of the values.
-  console.log(`etc: ${c}`);
-}
-
-// This doesn't work
-jank([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-
-// So, you have to spread them.
-jank(...[1, 2, 3, 4, 5, 6, 7, 8, 9]);
-
-// Or just pass in a bunch of vals
-jank(1, 2, 3, 4, 5, 6, 7, 8, 9);
-
-// One place you can use the spread operator is when you would normally
-// use .apply with the arguments as an array.
-
-// spread operator unpacks an array into a loose sequence of values.
-// rest arguments take a loose sequence of vals and pack them into an array.
-
-// Hmmm...will this work?
-// Nope, won't compile
-// function hay(...a, b) {
-//   console.log(`ayeee: ${a}`);
-//   console.log(`beeee: ${b}`);
-// }
-//
-// hay(1, 2, 3, 4, 5, 6, 7, 8, 9);
+  // Every 3 seconds, do the following...
+  recur(3000, () => {
+    let timeStamp = ((new Date()).getTime());
+    console.log(`sending: ${timeStamp}`);
+    socket.emit('message', { data: `received: ${timeStamp}` });
+  });
 
 
-{
-  // Object destructuring works like this:
-  // "look up the thing on left hand side of the colon and assign its value to the thing on the right hand side. "
-  // If it does not exist (for example, there is no `r` val, you can provide a default.)
-  let {a: x, r: b = 2} = { a: `hay`, x: `boo`};
-  console.log(x);
-  console.log(b);
-}
+  // before:
+  // socket.on('message', function (e) {
+  //   console.log(e.data);
+  // });
+  //
+  // after:
+  // And, just for fun, we are using a default param that references a value destructured out of the incoming object.
+  socket.on('message', ({data: msg, jank: stuff=msg.length}) => {
+    console.log(msg);
+    // console.log(stuff);
+  });
 
 
+  // Destructure the incoming object, pulling out the `data` property.
+  // Then, grab the `x` and `y` values using default param values, referencing the destructured value.
+  socket.on('coords', ({data: d, x=d.x, y=d.y}) => {
+    console.log(`${x}, ${y}`);
 
-// I wasn't aware of this syntax...
-let fibonacci = {
-  [Symbol.iterator]() {
-    let pre = 0, cur = 1;
-    return {
-      next() {
-        [pre, cur] = [cur, pre + cur];
-        return { done: false, value: cur }
-      }
+    // Gratuitous let-scoping
+    {
+      let dx = (x * 10),
+          dy = (y * 10);
+
+      // jQuery, for a quick and dirty CSS transform.
+      $('.jumbotron').css('transform', `translate(${dx}px, ${dy}px)`);
     }
-  }
-}
+  });
 
-for (var n of fibonacci) {
-  // truncate the sequence at 1000
-  if (n > 1000)
-    break;
-  console.log(n);
-}
+  // This is the ES5 equivalent
+  /*
+  socket.on('coords', function (obj) {
+    var x = obj.data.x;
+    var y = obj.data.y;
 
+    var dx = (x * 10);
+    var dy = (y * 10);
 
-console.log(typeof System);
+    $('.jumbotron').css('transform', 'translate(' + dx + 'px, ' + dy + 'px)');
+  });
+  */
+});
 
-
-
-// let boo pull out the values x, y, and z and return a function
-// that accepts an arg and multiplies it by the sum of x, y, and z
-let boo = ({x: ex = 100,
-            y: wy = 200,
-            z: ze = 300}) => (mult) => (mult * (ex + wy + ze));
-
-console.log('trying boo');
-console.log(boo({x: 40, y: 50})(0.3));
-console.log('trying bob');
-console.log(bob({x: 40, y: 50})(0.3));
 
