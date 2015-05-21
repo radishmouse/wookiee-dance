@@ -9,17 +9,29 @@ var reload = browserSync.reload;
 var browserify = require('browserify');
 var babelify = require('babelify');
 var source = require('vinyl-source-stream');
+var rename = require('gulp-rename');
 
 
 gulp.task('scripts', function () {
+ var bundleStream = browserify('./app/scripts/main.js').transform(babelify).bundle()
+
+  bundleStream
+    .pipe(source('./app/scripts/main.js'))
+    .pipe(rename('bundle.js'))
+    .pipe(gulp.dest('.tmp/scripts'))
   // This works correctly
-  var b = browserify({
-    entries: './app/scripts/main.js'
-  });
-  b.transform(babelify);
-  return b.bundle(function (err) { if (err) { (err); }})
-    .pipe(source('bundle.js'))
-    .pipe(gulp.dest('.tmp/scripts'));
+  // var b = browserify({
+  //   entries: './app/scripts/main.js'
+  // });
+  // b.transform(babelify);
+  // return b.bundle(function (err, buf) {
+  //   if (err) {
+  //     console.log(err);
+  //   }
+  //   console.log(buf.toString('utf-8'));
+  // })
+  //   .pipe(source('bundle.js'))
+  //   .pipe(gulp.dest('.tmp/scripts/bundle.js'))
 });
 
 gulp.task('styles', function () {
